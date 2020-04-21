@@ -14,25 +14,17 @@ public class Client {
         String port = reader.readLine();
 
         try (Socket socket = new Socket(address, Integer.parseInt(port))) {
-
-            DataInputStream dis = new DataInputStream(socket.getInputStream());
-            DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
-            String msgIn = "";
-            String msgOut = "";
-
+            InputThread inputThread = new InputThread(socket);
+            inputThread.start();
+            socket.setSoTimeout(600000000);
+            System.out.println("Connected to server (" + address + ":" + port + ")");
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             while (socket.isBound()) {
-                msgOut = br.readLine();
-                dos.writeUTF(msgOut);
-                msgIn = dis.readUTF();
-                System.out.println(msgIn);
+                String response = in.readLine();
+                System.out.println("server: " + response);
             }
-
-            dis.close();
-            dos.close();
-            br.close();
+            in.close();
+            reader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
