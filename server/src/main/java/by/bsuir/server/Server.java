@@ -21,26 +21,19 @@ public class Server {
                 return;
             }
             socket = server.accept();
+            System.out.println(socket.getInetAddress());
+            InputThread inputThread = new InputThread(socket);
+            inputThread.start();
+            out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            DataInputStream dis = new DataInputStream(socket.getInputStream());
-            DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
-            String msgIn;
-            String msgOut;
-
-            while (socket.isBound()) {
-                msgIn = dis.readUTF();
-                System.out.println(msgIn);
-                msgOut = br.readLine();
-                dos.writeUTF(msgOut);
-                dos.flush();
+            while (server.isBound()) {
+                String message = in.readLine();
+                System.out.println("Message from client: " + message);
             }
-
-            dis.close();
-            dos.close();
-            br.close();
+            System.out.println("server closed");
+            out.close();
+            in.close();
             socket.close();
             server.close();
         } catch (IOException e) {
